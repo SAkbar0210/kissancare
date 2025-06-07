@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+logs/
+logs_debug/
+uploads/
+processed_data/
+processed_data_backup_*/
+dataset/
+PlantVillage-Dataset/
+model/
+tf_gpu/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/ 

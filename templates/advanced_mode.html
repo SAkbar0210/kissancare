@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% block title %}KisanCare - {{ text.advanced_mode_title_page }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-end mb-3">
+        <div class="col-md-3">
+            <label for="languageSelect" class="form-label visually-hidden">Select Language</label>
+            <select class="form-select" id="languageSelect">
+                <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                <option value="te" {% if current_lang == 'te' %}selected{% endif %}>తెలుగు</option>
+                <option value="hi" {% if current_lang == 'hi' %}selected{% endif %}>हिंदी</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">{{ text.advanced_mode_title_page }}</h2>
+                    
+                    <!-- Quick Guide for Advanced Mode -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>{{ text.quick_guide_title_advanced }}</h5>
+                        <ol class="mb-0">
+                            <li>{{ text.quick_guide_step1_advanced }}</li>
+                            <li>{{ text.quick_guide_step2_advanced }}</li>
+                            <li>{{ text.quick_guide_step3_advanced }}</li>
+                        </ol>
+                    </div>
+
+                    <form id="advancedModeForm" action="{{ url_for('predict', lang=current_lang) }}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="mode" value="advanced">
+                        
+                        <!-- Phone Number Input -->
+                        <div class="mb-4">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone me-2"></i>{{ text.phone_number_label }}
+                                <i class="fas fa-info-circle ms-1" data-bs-toggle="tooltip" title="{{ text.phone_number_tooltip }}"></i>
+                            </label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   placeholder="+91XXXXXXXXXX" pattern="\+91\d{10}">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>{{ text.phone_number_help }}
+                            </div>
+                            <div id="phoneError" class="invalid-feedback">{{ text.invalid_phone_format }}</div>
+                        </div>
+                        
+                        <!-- Nutrient Inputs -->
+                        <div class="mb-4">
+                            <h5 class="mb-3"><i class="fas fa-leaf me-2"></i>{{ text.nutrient_details_heading }}</h5>
+                            <div class="row g-3">
+                                <!-- Example Nutrient Input: Nitrogen -->
+                                <div class="col-md-6">
+                                    <label for="nitrogen" class="form-label">{{ text.nitrogen_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="nitrogen" name="nitrogen" placeholder="e.g., 50">
+                                </div>
+                                <!-- Example Nutrient Input: Phosphorus -->
+                                <div class="col-md-6">
+                                    <label for="phosphorus" class="form-label">{{ text.phosphorus_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="phosphorus" name="phosphorus" placeholder="e.g., 25">
+                                </div>
+                                <!-- Add more nutrient inputs as needed -->
+                                <div class="col-md-6">
+                                    <label for="potassium" class="form-label">{{ text.potassium_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="potassium" name="potassium" placeholder="e.g., 120">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="magnesium" class="form-label">{{ text.magnesium_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="magnesium" name="magnesium" placeholder="e.g., 30">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="calcium" class="form-label">{{ text.calcium_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="calcium" name="calcium" placeholder="e.g., 180">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sulfur" class="form-label">{{ text.sulfur_label }}</label>
+                                    <input type="number" step="0.1" class="form-control" id="sulfur" name="sulfur" placeholder="e.g., 15">
+                                </div>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>{{ text.nutrient_details_help }}
+                            </div>
+                             <div id="nutrientError" class="invalid-feedback d-none">{{ text.invalid_nutrient_format }}</div>
+                        </div>
+                        
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label for="image" class="form-label">
+                                <i class="fas fa-camera me-2"></i>{{ text.upload_image_label }}
+                            </label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="image" name="image" 
+                                       accept="image/jpeg, image/png" required>
+                                <button class="btn btn-outline-secondary" type="button" id="captureButton" aria-label="{{ text.capture_photo_aria }}">
+                                    <i class="fas fa-camera"></i> {{ text.capture_photo }}
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>{{ text.image_upload_help }}
+                            </div>
+                            <div id="imageError" class="invalid-feedback d-none"></div>
+                            <div id="imagePreview" class="mt-2 text-center" aria-live="polite"></div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-2"></i>{{ text.analyze_button }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Results Section -->
+                    <div id="feedbackMessage" class="mt-4" aria-live="polite" aria-atomic="true"></div>
+                </div>
+            </div>
+
+             <!-- Tips Section -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb me-2"></i>{{ text.tips_title }}
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ text.tip_1 }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ text.tip_2 }}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ text.tip_3 }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ text.tip_4 }}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+}
+
+.btn {
+    border-radius: 8px;
+}
+
+#imagePreview img, #imagePreview video {
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.input-group .btn {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+#cameraPreviewContainer {
+    position: relative;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#takePhotoBtn {
+    z-index: 10;
+}
+</style>
+
+<script>
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Check browser compatibility
+    if (!window.fetch || !navigator.mediaDevices) {
+        document.getElementById('captureButton').disabled = true;
+        document.getElementById('captureButton').title = text.unsupported_browser;
+    }
+});
+
+// Image preview script (same as basic_mode.html)
+document.getElementById('image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const imageError = document.getElementById('imageError');
+    
+    if (file) {
+        // Validate file size (8MB max)
+        if (file.size > 8 * 1024 * 1024) {
+            imageError.textContent = text.image_too_large;
+            imageError.classList.remove('d-none');
+            this.value = '';
+            return;
+        }
+        
+        // Validate file type
+        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+            imageError.textContent = text.invalid_image_format;
+            imageError.classList.remove('d-none');
+            this.value = '';
+            return;
+        }
+        
+        imageError.classList.add('d-none');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <div class="position-relative">
+                    <img src="${e.target.result}" class="img-fluid" alt="${text.image_preview_alt}">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" 
+                            onclick="document.getElementById('imagePreview').innerHTML = ''; document.getElementById('image').value = '';"
+                            aria-label="${text.remove_image_aria}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>`;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form validation and submission (needs modification for nutrient data and mode)
+document.getElementById('advancedModeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    // Validate phone number if provided
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput.value && !phoneInput.checkValidity()) {
+        phoneInput.classList.add('is-invalid');
+        return false;
+    }
+    phoneInput.classList.remove('is-invalid');
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const feedbackMessageDiv = document.getElementById('feedbackMessage');
+    feedbackMessageDiv.innerHTML = '';
+    feedbackMessageDiv.className = 'mt-4';
+
+    // Show loading indicator
+    feedbackMessageDiv.innerHTML = `
+        <div class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-3" role="status">
+                    <span class="visually-hidden">${text.loading}</span>
+                </div>
+                <div>
+                    <h5 class="mb-1">${text.analyzing_message}</h5>
+                    <p class="mb-0">${text.please_wait_message}</p>
+                </div>
+            </div>
+        </div>`;
+
+    // Disable submit button during processing
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        ${text.analyzing_message}
+    `;
+
+    // Track form submission
+    if (typeof trackEvent === 'function') {
+        trackEvent('Prediction', 'FormSubmit', 'AdvancedMode'); // Track as AdvancedMode
+    }
+
+    fetch(form.action, {
+        method: form.method,
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                const error = new Error(data.message || data.error || `${text.http_error} ${response.status}`);
+                error.status = response.status;
+                throw error;
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // --- Display Results (needs modification for nutrient analysis results) ---
+        if (data.disease && data.confidence !== undefined) {
+            feedbackMessageDiv.className = 'mt-4 alert alert-success';
+            let successMessage = `
+                <h5 class="alert-heading">
+                    <i class="fas fa-check-circle me-2"></i>${text.analysis_complete_message}
+                </h5>
+                <hr>
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-bug me-2"></i>
+                        <strong>${text.prediction_class_prefix}</strong> ${data.disease}
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <strong>${text.confidence_prefix}</strong> ${(data.confidence * 100).toFixed(1)}%
+                    </div>
+                    <!-- Nutrient analysis results will be added here -->
+                    <div id="nutrientAnalysisResults" class="mt-3">
+                        <h6><i class="fas fa-leaf me-2"></i>${text.nutrient_analysis_heading}</h6>
+                        <!-- Dynamic content based on nutrient analysis results -->
+                        <p>${text.nutrient_analysis_placeholder}</p>
+                    </div>
+                     <div class="mt-3">
+                        <strong><i class="fas fa-clipboard-list me-2"></i>${text.basic_treatment_guidance_heading}</strong>
+                        <p class="mb-0 mt-2">${data.treatment}</p>
+                    </div>
+                </div>`;
+                
+            if (data.sms_status) {
+                successMessage += `<hr><small class="text-muted"><i class="fas fa-info-circle me-1"></i>${data.sms_status}</small>`;
+            }
+
+            feedbackMessageDiv.innerHTML = successMessage;
+
+            // --- Add logic to display nutrient analysis results ---
+            if (data.nutrient_analysis) {
+                 const nutrientResultsDiv = document.getElementById('nutrientAnalysisResults');
+                 let nutrientHtml = `<h6><i class="fas fa-leaf me-2"></i>${text.nutrient_analysis_heading}</h6>`;
+
+                 // Display overall status
+                 nutrientHtml += `<p><strong>${text.overall_status_prefix}:</strong> ${data.nutrient_analysis.overall_status}</p>`;
+
+                 // Display individual nutrient statuses
+                 if (Object.keys(data.nutrient_analysis.nutrients).length > 0) {
+                     nutrientHtml += `<h6>${text.individual_nutrient_statuses_heading}</h6><ul>`;
+                     for (const nutrient in data.nutrient_analysis.nutrients) {
+                          const nutrientData = data.nutrient_analysis.nutrients[nutrient];
+                          nutrientHtml += `<li><strong>${nutrient.charAt(0).toUpperCase() + nutrient.slice(1)}:</strong> Value: ${nutrientData.value}, Status: ${nutrientData.status}</li>`;
+                     }
+                     nutrientHtml += `</ul>`;
+                 }
+
+                 // Display recommendations
+                 if (data.nutrient_analysis.recommendations && data.nutrient_analysis.recommendations.length > 0) {
+                     nutrientHtml += `<h6>${text.nutrient_recommendations_heading}</h6><ul>`;
+                     data.nutrient_analysis.recommendations.forEach(rec => {
+                          nutrientHtml += `<li><strong>${rec.priority.charAt(0).toUpperCase() + rec.priority.slice(1)}:</strong> ${rec.action} (${rec.target_range})</li>`;
+                     });
+                     nutrientHtml += `</ul>`;
+                 }
+
+                 nutrientResultsDiv.innerHTML = nutrientHtml;
+            }
+
+        } else if (data.status === 'warning' && data.message) {
+             feedbackMessageDiv.className = 'mt-4 alert alert-warning';
+             feedbackMessageDiv.innerHTML = `
+                 <h5 class="alert-heading">
+                     <i class="fas fa-exclamation-triangle me-2"></i>${text.low_confidence_prediction}
+                 </h5>
+                 <p class="mb-0">${data.message}</p>
+             `;
+        } else {
+            feedbackMessageDiv.className = 'mt-4 alert alert-danger';
+            feedbackMessageDiv.innerHTML = `
+                <h5 class="alert-heading">
+                    <i class="fas fa-exclamation-circle me-2"></i>${text.error}
+                </h5>
+                <p class="mb-0">${text.unknown_error}</p>
+                <small class="text-muted">${text.unexpected_response}</small>
+            `;
+        }
+        
+        // Track successful prediction
+        if (typeof trackEvent === 'function' && data.disease) {
+            trackEvent('Prediction', 'Success', data.disease); // Track as Prediction Success
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        feedbackMessageDiv.className = 'mt-4 alert alert-danger';
+
+        let userMessage = text.form_submit_error;
+        if (error.status === 413) {
+            userMessage = text.error_file_too_large;
+        } else if (error.status === 400) {
+            userMessage = text.error_invalid_image;
+        } else if (error.message.includes('NetworkError')) {
+            userMessage = text.error_network;
+        }
+
+        feedbackMessageDiv.innerHTML = `
+            <h5 class="alert-heading">
+                <i class="fas fa-exclamation-circle me-2"></i>${text.error}
+            </h5>
+            <p class="mb-0">${userMessage}</p>
+        `;
+        
+        // Track error
+        if (typeof trackEvent === 'function') {
+            trackEvent('Prediction', 'Error', error.status || 'Unknown'); // Track as Prediction Error
+        }
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = `
+            <i class="fas fa-search me-2"></i>${text.analyze_button}
+        `;
+    });
+});
+
+// Language selection (same as basic_mode.html)
+document.getElementById('languageSelect').addEventListener('change', function() {
+    const lang = this.value;
+    if (typeof trackEvent === 'function') {
+        trackEvent('Language', 'Change', lang);
+    }
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', lang);
+    window.location.href = currentUrl.toString();
+});
+
+// Camera capture functionality (same as basic_mode.html)
+document.getElementById('captureButton').addEventListener('click', async function() {
+    const input = document.getElementById('image');
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const previewContainer = document.getElementById('imagePreview');
+        previewContainer.innerHTML = `
+            <div id="cameraPreviewContainer" class="border rounded p-2 mb-2">
+                <video class="img-fluid" autoplay playsinline></video>
+                <button type="button" class="btn btn-primary position-absolute bottom-0 start-50 translate-middle-x mb-2" id="takePhotoBtn">
+                    <i class="fas fa-camera me-1"></i>${text.capture_button}
+                </button>
+            </div>`;
+        
+        const video = previewContainer.querySelector('video');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+
+        // Set up capture button
+        document.getElementById('takePhotoBtn').addEventListener('click', function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(function(blob) {
+                const file = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                input.files = dataTransfer.files;
+                
+                // Stop stream and clean up
+                stream.getTracks().forEach(track => track.stop());
+                previewContainer.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${URL.createObjectURL(file)}" class="img-fluid" alt="${text.image_preview_alt}">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" 
+                                onclick="document.getElementById('imagePreview').innerHTML = ''; document.getElementById('image').value = '';"
+                                aria-label="${text.remove_image_aria}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>`;
+                
+                // Clear any previous errors
+                imageError.classList.add('d-none');
+            }, 'image/jpeg');
+        });
+    }
+});
+
+// Add text object from Flask to be used in JS
+// eslint-disable-next-line
+var text = JSON.parse('{{ text | tojson | safe }}');
+// eslint-disable-next-line
+var LANGUAGES = JSON.parse('{{ languages | tojson | safe }}');
+
+// Analytics function (if analytics service is loaded) (same as basic_mode.html)
+function trackEvent(category, action, label) {
+    if (window.ga) {
+        ga('send', 'event', category, action, label);
+    }
+    // Add other analytics providers as needed
+}
+</script>
+{% endblock %} 

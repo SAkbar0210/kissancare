@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}KisanCare - {{ text.home_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-end mb-3">
+        <div class="col-md-3">
+            <label for="languageSelect" class="form-label visually-hidden">Select Language</label>
+            <select class="form-select" id="languageSelect">
+                <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+                <option value="te" {% if current_lang == 'te' %}selected{% endif %}>తెలుగు</option>
+                <option value="hi" {% if current_lang == 'hi' %}selected{% endif %}>हिंदी</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">{{ text.welcome_message }}</h1>
+        <p class="lead">{{ text.app_description }}</p>
+    </div>
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-4">
+            <a href="{{ url_for('basic_mode', lang=current_lang) }}" class="card h-100 shadow-sm d-block text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-mobile-alt fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title text-dark">{{ text.basic_mode_title }}</h3>
+                    <p class="card-text text-muted">{{ text.basic_mode_description }}</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('advanced_mode', lang=current_lang) }}" class="card h-100 shadow-sm d-block text-decoration-none">
+                <div class="card-body text-center">
+                    <i class="fas fa-flask fa-3x mb-3 text-success"></i>
+                    <h3 class="card-title text-dark">{{ text.advanced_mode_title }}</h3>
+                    <p class="card-text text-muted">{{ text.advanced_mode_description }}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+</style>
+
+<script>
+document.getElementById('languageSelect').addEventListener('change', function() {
+    const lang = this.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', lang);
+    window.location.href = currentUrl.toString();
+});
+</script>
+{% endblock %}
